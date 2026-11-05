@@ -1,3 +1,8 @@
+
+import json
+from datetime import datetime
+
+
 # start of basic cli interface
 print("====================================================")
 print("                Cab Pool (BITS PILANI)              ")
@@ -11,10 +16,16 @@ print("3. Quit the app.")
 print()
 
 
-#now we import the required modules/libraries
+#load the json file
+print("loading json file")
+with open("cabs.json","r", encoding="utf-8") as f:
+    data = json.load(f)
+    print(data)
+print("json file loaded successfully")
 
-import json
-from datetime import datetime
+
+
+
 
 
 #defining the classes #phase 1
@@ -90,7 +101,7 @@ class Cab:
 
 
 
-waiting_room = {}
+# waiting_room = {}
 #now the main program
 dest_dict = {"1": "Delhi", "delhi": "Delhi", "2": "Jaipur", "jaipur": "Jaipur"}
 timeslot_dict = {
@@ -102,7 +113,7 @@ timeslot_dict = {
 
 
 def task_1():
-    name = input("enter your first name").strip().title()
+    name = input("enter your first name: ").strip().title()
 
     while True:
             print("\nDestinations: 1. Delhi | 2. Jaipur")
@@ -129,10 +140,24 @@ def task_1():
             except ValueError:
                 print("Invalid input. Please enter a number between 1 and 5.")
 
-    tiime = datetime.now()
+    tiime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     request = RideRequest(name=name, destination=destination, time_slot=time_slot, year=year,submitted_at=tiime)
-    waiting_room[f"{destination} and {time_slot}"] = request.to_dict()
+    # waiting_room[f"{destination} and {time_slot}"] = request.to_dict()
+    with open("state.json",'r',encoding="utf-8") as f:
+        data2 = json.load(f)
+    # print(request.to_dict())
+
+
+    key = f'{destination} and {time_slot}'
+    if key not in data2['waiting_queues']:
+        data2['waiting_queues'][key] = []
+    data2['waiting_queues'][key].append(request.to_dict())
+
+    # data2['waiting_queues'][f'{destination} and {time_slot}'].append(request.to_dict())
+    with open("state.json",'w',encoding='utf-8') as f:
+        json.dump(data2,f ,indent = 4)
+        
 
     
 
@@ -145,7 +170,7 @@ def task():
 
     while True:
         try:
-            task_number = int(input("Enter task number (1-3): ").strip())
+            task_number = int(input("\nEnter task number (1-3): ").strip())
 
             if task_number not in expected_task_no:
                 print("Invalid task number. Try again.")
@@ -161,13 +186,19 @@ def task():
 
     if task_number == 1:
         task_1()
-        print(waiting_room)
+        
+        task()
 
     elif task_number == 2:
-        print("Processing task 2")
+        with open("state.json",'r', encoding='utf-8') as f:
+            data2 = json.load(f)
+        print(data2['waiting_queues'])
+        print()
+        task()
+
 
     elif task_number == 3:
-        print("Processing task 3")
+        print("quitting app. thanks")
 
 
 task()
