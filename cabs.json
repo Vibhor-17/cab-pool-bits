@@ -1,0 +1,56 @@
+[
+  {
+    "driver": "Ramesh Kumar",
+    "seats": 4,
+    "destination": "Delhi",
+    "time_slot": "Morning"
+  },
+  {
+    "driver": "Suresh Singh",
+    "seats": 3,
+    "destination": "Delhi",
+    "time_slot": "Morning"
+  },
+  {
+    "driver": "Mukesh Meena",
+    "seats": 4,
+    "destination": "Delhi",
+    "time_slot": "Afternoon"
+  },
+  {
+    "driver": "Rajesh Verma",
+    "seats": 2,
+    "destination": "Delhi",
+    "time_slot": "Evening"
+  },
+  {
+    "driver": "Anil Sharma",
+    "seats": 4,
+    "destination": "Delhi",
+    "time_slot": "Night"
+  },
+  {
+    "driver": "Dinesh Gupta",
+    "seats": 4,
+    "destination": "Jaipur",
+    "time_slot": "Morning"
+  },
+  {
+    "driver": "Mahesh Sharma",
+    "seats": 3,
+    "destination": "Jaipur",
+    "time_slot": "Afternoon"
+  },
+  {
+    "driver": "Vikram Chauhan",
+    "seats": 2,
+    "destination": "Jaipur",
+    "time_slot": "Evening"
+  },
+  {
+    "driver": "Sunil Yadav",
+    "seats": 1,
+    "destination": "Jaipur",
+    "time_slot": "Night"
+  }
+]
