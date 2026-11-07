@@ -177,29 +177,62 @@ def task_3():
     with open("state.json",'r',encoding="utf-8") as f:
         data2 = json.load(f)
     # cab_objests = {}
-    
+    already_previewed = set() 
     for cab in data2['cabs']:
         # print(tabulate([cab],headers="keys"))
         objectt = Cab(driver=cab["driver"],seats=cab["seats"],destination = cab["destination"],time_slot=cab["time_slot"],has_left = cab["has_left"],passengers=cab["passengers"])
+        
         if objectt.has_left == True:
             pass
         else:
             if objectt.seats == len(objectt.passengers):
                 cab2 = {**cab, "has_left": True}
-                print(tabulate([cab2],headers="keys"))
-            else:
-                students = sorted(
-                    data2["waiting_queues"][objectt.slot()],
-                    key =lambda x: (x["year"],x["submitted_at"]) )
+                # print(tabulate([cab2],headers="keys"))
+                p_names = ", ".join([f"{p['name']} (Yr {p['year']})" for p in cab2.get("passengers", [])])
+                display_row = [{
+                    "Driver": cab2["driver"],
+                    "Trip": objectt.slot(),
+                    "Seats": f"{len(cab2.get('passengers', []))}/{cab2['seats']}",
+                    "Status": "Departed (Full)",
+                    "Previewed Passengers": p_names if p_names else "None"
+                }]
+                print(tabulate(display_row, headers="keys", tablefmt="grid"))
+                print()
+            
+            else:  
+                if objectt.slot() not in data2["waiting_queues"]:
+                    data2["waiting_queues"][objectt.slot()] = []
+                # students = [s for s in 
+                #     sorted(
+                #     data2["waiting_queues"][objectt.slot()],
+                #     key =lambda x: (-x["year"],x["submitted_at"]) )
+                #     if s not in already_previewed]   
+                students = [
+                    s for s in sorted(
+                        data2["waiting_queues"][objectt.slot()],
+                        key=lambda x: (-x["year"], x["submitted_at"])
+                    ) if s["name"] not in already_previewed
+                ]
+                
+                preview = objectt.passengers    
                 for i in range(objectt.seats - len(objectt.passengers)):
-                    preview = objectt.passengers
+
                     if i < len(students):
                         preview.append(students[i])
-                    else:
-                        pass
+                        already_previewed.add(students[i]["name"])
                 cab2 = {**cab, "has_left": True, "passengers": preview}
-                print(tabulate(cab2,headers="keys"))
-                
+                # print(tabulate(cab2,headers="keys"))
+                p_names = ", ".join([f"{p['name']} (Yr {p['year']})" for p in preview])
+                display_row = [{
+                    "Driver": cab2["driver"],
+                    "Trip": objectt.slot(),
+                    "Seats": f"{len(preview)}/{cab2['seats']}",
+                    "Status": "Previewed Departure",
+                    "Previewed Passengers": p_names if p_names else "None"
+                }]
+                print(tabulate(display_row, headers="keys", tablefmt="grid"))
+                print()
+                                
                 
 
         
