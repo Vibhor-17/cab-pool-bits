@@ -2,6 +2,7 @@
 import json
 from datetime import datetime
 from tabulate import tabulate
+import heapq
 
 # start of basic cli interface
 print("====================================================")
@@ -234,8 +235,59 @@ def task_3():
                 print()
                                 
                 
+def task_4():
+    
+    while True:
+            print("\nDestinations: 1. Delhi | 2. Jaipur")
+            raw_dest = input("Enter destination (1-2 or name): ").strip().lower()
+            if raw_dest in dest_dict:
+                destination = dest_dict[raw_dest]  
+                break
+            print(f"Sorry, we don't serve '{raw_dest}'. Please choose Delhi (1) or Jaipur (2).")
+    while True:
+            print("\nTime Slots: 1. Morning | 2. Afternoon | 3. Evening | 4. Night")
+            raw_slot = input("Enter time slot (1-4 or name): ").strip().lower()
+            if raw_slot in timeslot_dict:
+                time_slot = timeslot_dict[raw_slot]   
+                break
+            print("Invalid time slot. Please choose 1-4 (Morning, Afternoon, Evening, Night).")
 
+    with open("state.json","r",encoding="utf-8") as f:
+        data2 = json.load(f)
+    waiting_students_for_this = []
+    for cab in data2["cabs"]:
+        objectt = Cab(driver=cab["driver"],seats=cab["seats"],destination = cab["destination"],time_slot=cab["time_slot"],has_left = cab["has_left"],passengers=cab["passengers"])
         
+        if objectt.slot() == f"{destination} and {time_slot}" and objectt.has_left == False:
+            if objectt.slot() in data2["waiting_queues"]:
+                
+                waiting_students_for_this = data2["waiting_queues"][objectt.slot()]
+                heap = []   
+                for idx,student  in enumerate(data2["waiting_queues"][objectt.slot()]):
+                    heapq.heappush( heap, (-student["year"], student["submitted_at"],idx, student))
+                for i in range(objectt.seats - len(objectt.passengers)):
+                    if len(heap) > 0:
+                        highest = heapq.heappop(heap)[3]
+                        objectt.passengers.append(highest)
+                        data2["waiting_queues"][objectt.slot()].remove(highest)            
+            else:
+                print("No students waiting for this trip")
+                return
+
+            people = []
+            for passenger in objectt.passengers:
+                people.append(f"{passenger["name"]} (yr{passenger["year"]})")
+            
+            if len(people) != 0:
+                cab.update({"has_left": True, "passengers": objectt.passengers})
+                with open("state.json","w",encoding="utf-8") as f:
+                    json.dump(data2, f, indent=4)
+                print(f"{cab["driver"]} has left for {cab["destination"]} with {people}")
+            else:
+                print(f"{cab["driver"]} can not leave as teh cab has no passengers")
+            return
+
+    print("No open cabs available for this trip.")
     
 
     
@@ -275,7 +327,7 @@ def task():
         task_3()
 
     elif task_number == 4:
-        print()
+        task_4()
 
     else:
         print("quitting app. thanks")
