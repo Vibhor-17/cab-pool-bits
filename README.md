@@ -55,14 +55,14 @@ I created two classes (`RideRequest` and `Cab`) for Phase 1 and used `state.json
 ### Task 4 (`task_4`): Dispatching a Cab (How the `heapq` Works)
 * Asks the user for the destination and time slot to dispatch.
 * Loops through `data2["cabs"]` to find the first open cab matching `f"{destination} and {time_slot}"` where `has_left == False`.
-* Once found, it creates an empty min-heap (`heap = []`) and pushes every waiting student for that slot into `heapq` using `enumerate`< first i was trying to use index as a parameter to decide the priority also as the submitted time could also be same; but I later on added a millisecond option to avoid this>:
+* Once found, it creates an empty min-heap (`heap = []`) and pushes every waiting student for that slot into `heapq` using `enumerate`< first i was trying to use index as a parameter to decide the priority also as the submitted time could also be same; but I later on added a microsecond option to avoid this>:
   ```python
   heapq.heappush(heap, (-student["year"], student["submitted_at"], idx, student))
   ```
 * **How the Heap Tuple Works:**
   1. `-student["year"]`: Since `heapq` is a min-heap, negating the year makes 5th years (`-5`) pop before 1st years (`-1`).
   2. `student["submitted_at"]`: If two students are in the same year, the earlier timestamp string is smaller, so whoever requested first pops first.
-  (3. `idx`: The list index from `enumerate`. If two students from the same year ever have the exact same timestamp down to the second, `idx` acts as a tie-breaker based on who was appended to the list first, preventing Python from crashing by trying to compare two `student` dictionaries directly.){lateer this was avoided by millisecond consideration}
+  (3. `idx`: The list index from `enumerate`. If two students from the same year ever have the exact same timestamp down to the second, `idx` acts as a tie-breaker based on who was appended to the list first, preventing Python from crashing by trying to compare two `student` dictionaries directly.){lateer this was avoided by microsecond consideration}
   4. `student`: The actual student dictionary at index `[3]`.
 * It then runs a `for` loop for the number of available seats (`objectt.seats - len(objectt.passengers)`), pops the highest-priority student using `heapq.heappop(heap)[3]`, appends them to `objectt.passengers`, and removes them from `data2["waiting_queues"][objectt.slot()]`.
 * Finally, it sets `"has_left": True` and saves the updated state to `state.json`.{auto saved and it re state to not to change the state.json during the program is running}
@@ -86,7 +86,7 @@ I created two classes (`RideRequest` and `Cab`) for Phase 1 and used `state.json
    Because `task_1()` directly appends new requests to `data2["waiting_queues"]` in `state.json` without the neeed of an open cab right , students who submit requests after all cabs have left are still saved in the waiting queue and show up in Task 2. If someone tries to dispatch a cab for that trip in `task_4()`, the loop finishes and prints `"No open cabs available for this trip."`.
 
 4. **Same Year Students:**
-   Handled by both `submitted_at` and `idx` in the heap tuple `(-student["year"], student["submitted_at"], idx, student)` in `task_4()`, and by `(-x["year"], x["submitted_at"])` in `task_3()` but the `idx` handling is not really required as the submitted time is taken upto milliseconds which is almost impossilbe to make same except if the user delibrately changes it in `state.json`. Since `task_1()` appends requests in the order they arrive and saves them to `state.json`, the exact arrival order is kept even if the app is closed and reopened.
+   Handled by both `submitted_at` and `idx` in the heap tuple `(-student["year"], student["submitted_at"], idx, student)` in `task_4()`, and by `(-x["year"], x["submitted_at"])` in `task_3()` but the `idx` handling is not really required as the submitted time is taken upto microseconds which is almost impossilbe to make same except if the user delibrately changes it in `state.json`. Since `task_1()` appends requests in the order they arrive and saves them to `state.json`, the exact arrival order is kept even if the app is closed and reopened.
 
 5. **Lots of Students (Big-O Complexity for N = 1,000 requests):**
    * **Adding 1 request & adding all 1,000:**
