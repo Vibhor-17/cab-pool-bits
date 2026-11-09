@@ -23,6 +23,16 @@ This is my submission for the SUTT Backend Recruitment Task 1. It is a CLI-based
 ```
 When the app runs for the first time, it reads `cabs.json` and adds two extra fields to each cab dictionary inside `state.json`: `"has_left": False` and `"passengers": []`.
 * a sample cabs.json is also provided.
+
+---
+## Input(s)
+*menu option is asked at the start should be between 1-5.
+*menu option 1 is for creating a `new ride request`.
+*menu option 2 is for viewing the current `cabs and waiting queues` for respective destinations.
+*menu option 3 will provide a `preview of cabs and their passengers` if all the cab waiting depart now.
+*menu option 4 can be used to `depart cab(s)` for a particular desitination for a particular time slot.
+*menu option 5 is to quit the app.
+*name,year and other details fill as asked; though `.title()` and `serial number` consideration will make it easier for the user.
 ---
 
 ## How My Code & Sorting Logic Work Across Tasks
@@ -66,6 +76,8 @@ I created two classes (`RideRequest` and `Cab`) for Phase 1 and used `state.json
   4. `student`: The actual student dictionary at index `[3]`.
 * It then runs a `for` loop for the number of available seats (`objectt.seats - len(objectt.passengers)`), pops the highest-priority student using `heapq.heappop(heap)[3]`, appends them to `objectt.passengers`, and removes them from `data2["waiting_queues"][objectt.slot()]`.
 * Finally, it sets `"has_left": True` and saves the updated state to `state.json`.{auto saved and it re state to not to change the state.json during the program is running}
+
+
 
 ---
 
