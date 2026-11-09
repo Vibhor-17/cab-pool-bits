@@ -1,4 +1,3 @@
-
 import json
 from datetime import datetime
 from tabulate import tabulate
@@ -26,19 +25,28 @@ except Exception as e:
 
 from pathlib import Path
 state_path = Path("state.json")
-print("enquiring if state.json already exist")
+reset_state = True
 if state_path.exists():
-    print("state.json already exist,(app not running for the first time)")
-    # data2 ={}          #use data2 variable ahead for data in state.json global variable
-else:
-    print("state.json doesn't exist\n creating state.json for optimising and memory purposes")
-    with open("state.json", "w", encoding='utf-8') as f2:
-        data2 = {"cabs":[], "waiting_queues" : {}}
+    try:
+        with open("state.json", "r", encoding="utf-8") as f_check:
+            check_data = json.load(f_check)
+        if "cabs" in check_data and "waiting_queues" in check_data:
+            print("state.json already exists and is valid.")
+            reset_state = False
+        else:
+            print("state.json is missing required keys. Starting fresh...")
+    except Exception:
+        print("state.json is broken or corrupted. Starting fresh...")
+
+if reset_state:
+    print("Creating fresh state.json from cabs.json...")
+    with open("state.json", "w", encoding="utf-8") as f2:
+        data2 = {"cabs": [], "waiting_queues": {}}
         for cab in data:
             cab["has_left"] = False
             cab["passengers"] = []
-            data2["cabs"].append(cab) 
-        json.dump(data2,f2,indent= 4)
+            data2["cabs"].append(cab)
+        json.dump(data2, f2, indent=4)
     print("state.json file created, program ready for getting ride requests")
 
 
@@ -116,9 +124,6 @@ class Cab:
 
 
 
-
-
-
 #now the main program
 dest_dict = {"1": "Delhi", "delhi": "Delhi", "2": "Jaipur", "jaipur": "Jaipur"}
 timeslot_dict = {
@@ -157,7 +162,7 @@ def task_1():
             except ValueError:
                 print("Invalid input. Please enter a number between 1 and 5.")
 
-    tiime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    tiime = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
     request = RideRequest(name=name, destination=destination, time_slot=time_slot, year=year,submitted_at=tiime)
     
@@ -203,24 +208,19 @@ def task_3():
             else:  
                 if objectt.slot() not in data2["waiting_queues"]:
                     data2["waiting_queues"][objectt.slot()] = []
-                # students = [s for s in 
-                #     sorted(
-                #     data2["waiting_queues"][objectt.slot()],
-                #     key =lambda x: (-x["year"],x["submitted_at"]) )
-                #     if s not in already_previewed]   
                 students = [
                     s for s in sorted(
                         data2["waiting_queues"][objectt.slot()],
                         key=lambda x: (-x["year"], x["submitted_at"])
-                    ) if s["name"] not in already_previewed
+                    ) if (s["name"], s["year"], s["submitted_at"]) not in already_previewed
                 ]
                 
-                preview = objectt.passengers    
+                preview = list(objectt.passengers  )  
                 for i in range(objectt.seats - len(objectt.passengers)):
 
                     if i < len(students):
                         preview.append(students[i])
-                        already_previewed.add(students[i]["name"])
+                        already_previewed.add((students[i]["name"], students[i]["year"], students[i]["submitted_at"]))
                 cab2 = {**cab, "has_left": True, "passengers": preview}
                 # print(tabulate(cab2,headers="keys"))
                 p_names = ", ".join([f"{p['name']} (Yr {p['year']})" for p in preview])
@@ -234,7 +234,8 @@ def task_3():
                 print(tabulate(display_row, headers="keys", tablefmt="grid"))
                 print()
                                 
-                
+
+
 def task_4():
     
     while True:
@@ -284,7 +285,7 @@ def task_4():
                     json.dump(data2, f, indent=4)
                 print(f"{cab["driver"]} has left for {cab["destination"]} with {people}")
             else:
-                print(f"{cab["driver"]} can not leave as teh cab has no passengers")
+                print(f"{cab["driver"]} can not leave as thee cab has no passengers")
             return
 
     print("No open cabs available for this trip.")
@@ -293,13 +294,12 @@ def task_4():
     
 
 
-
 def task():
     expected_task_no = [1, 2, 3, 4, 5]
 
     while True:
         try:
-            task_number = int(input("\nEnter task number (1-3): ").strip())
+            task_number = int(input("\nEnter task number (1-5): ").strip())
             if task_number not in expected_task_no:
                 print("Invalid task number. Try again.")
                 continue
@@ -313,12 +313,18 @@ def task():
     elif task_number == 2:
         with open("state.json",'r',encoding="utf-8") as f:
             data2 = json.load(f)
+        for cab in data2["cabs"]:
+            a = []
+            for passenger in cab["passengers"]:
+                a.append(f"{passenger["name"]}(Yr-{passenger["year"]})")
+            cab.update({"seats": f"{len(a)}/{cab['seats']}","passengers": a })
         print(tabulate(data2["cabs"],headers="keys"))
         print()
         if data2["waiting_queues"] == {}:
             print("no one in waiting queues")
         else:
             for slot in data2["waiting_queues"]:
+                print("Waiting Queue(s):")
                 print(f"            {slot}            ")
                 print(tabulate(data2['waiting_queues'][slot],headers="keys"))
                 print()
@@ -336,6 +342,8 @@ def task():
 
 
 
-while task():
-    pass
-
+try:
+    while task():
+        pass
+except KeyboardInterrupt:
+    print("\nApp interrupted via Ctrl+C. All changes are safely saved in state.json.")
