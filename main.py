@@ -17,10 +17,13 @@ try:
     print("cab.json file loaded successfully.")
 except FileNotFoundError: 
     print(f"Error: The file 'cabs.json' was not found.")
+    raise SystemExit(1)
 except PermissionError:
     print(f"Error: You do not have permission to access 'cabs.json'.")
+    raise SystemExit(1)
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
+    raise SystemExit(1)
 
 
 from pathlib import Path
